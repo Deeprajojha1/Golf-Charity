@@ -1,3 +1,4 @@
+// Purpose: Bootstraps Express server, middleware, routes, and Mongo connection.
 import path from 'path'
 import express from 'express'
 import dotenv from 'dotenv'

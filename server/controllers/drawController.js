@@ -23,11 +23,21 @@ async function listDraws(req, res) {
 async function latestDraw(req, res) {
   if (memoryStore.enabled) {
     const latest = memoryStore.latestDraw()
-    return res.json({ draw: latest })
+    return res.json({ draw: latest, fallback: null })
   }
 
   const draw = await Draw.findOne({}).sort({ createdAt: -1 }).lean()
-  return res.json({ draw })
+  if (draw) return res.json({ draw, fallback: null })
+
+  // If there is no draw yet, send a safe fallback for UI demo.
+  return res.json({
+    draw: null,
+    fallback: {
+      monthKey: getMonthKey(),
+      numbers: [5, 12, 18, 27, 33],
+      logicType: 'random',
+    },
+  })
 }
 
 async function simulateDraw(req, res) {

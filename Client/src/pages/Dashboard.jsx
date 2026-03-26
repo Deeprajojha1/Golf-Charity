@@ -6,6 +6,7 @@ import { addScore, editScore, fetchDashboard } from '../features/dashboard/dashb
 import { winnerAPI } from '../services/winnerAPI'
 import { subscriptionAPI } from '../services/subscriptionAPI'
 import { toast } from 'react-hot-toast'
+import { drawAPI } from '../services/drawAPI'
 
 export default function Dashboard() {
   const dispatch = useAppDispatch()
@@ -18,6 +19,8 @@ export default function Dashboard() {
   const [winners, setWinners] = useState([])
   const [proofInputs, setProofInputs] = useState({})
   const [submitting, setSubmitting] = useState(false)
+  const [latestDraw, setLatestDraw] = useState(null)
+  const [drawFallback, setDrawFallback] = useState(null)
 
   const isLoading = status === 'loading' && !user
   const data = dashboardState.data
@@ -41,6 +44,20 @@ export default function Dashboard() {
       }
     }
     loadWinners()
+  }, [user])
+
+  useEffect(() => {
+    const loadLatestDraw = async () => {
+      if (!user) return
+      try {
+        const res = await drawAPI.latest()
+        setLatestDraw(res.draw || null)
+        setDrawFallback(res.fallback || null)
+      } catch {
+        // silent
+      }
+    }
+    loadLatestDraw()
   }, [user])
 
   const scoreSubmitLabel = useMemo(() => {
@@ -111,6 +128,10 @@ export default function Dashboard() {
       setSubmitting(false)
     }
   }
+
+  const userScores = (data?.scores || []).map((s) => Number(s.value))
+  const drawNumbers = latestDraw?.numbers || drawFallback?.numbers || []
+  const matchedCount = drawNumbers.filter((n) => userScores.includes(n)).length
 
   return (
     <main className="gc-page">
@@ -315,6 +336,26 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
+          </div>
+
+          <div className="gc-card" style={{ marginTop: 16 }}>
+            <div className="gc-page-header" style={{ marginBottom: 12 }}>
+              <h2 className="gc-page-title" style={{ fontSize: 24 }}>
+                Latest Draw Results
+              </h2>
+            </div>
+            {drawNumbers.length ? (
+              <>
+                <p className="gc-page-sub">
+                  Draw numbers: <strong>{drawNumbers.join(', ')}</strong>
+                </p>
+                <p className="gc-page-sub">
+                  You matched <strong>{matchedCount}</strong> numbers.
+                </p>
+              </>
+            ) : (
+              <p className="gc-page-sub">No draw published yet.</p>
+            )}
           </div>
 
           <div className="gc-card" style={{ marginTop: 16 }}>

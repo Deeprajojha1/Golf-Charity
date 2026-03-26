@@ -1,3 +1,4 @@
+// Purpose: Entry point that mounts the React app with Redux and router providers.
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
