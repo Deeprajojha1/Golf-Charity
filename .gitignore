@@ -1,0 +1,7 @@
+.env
+Client/.env
+server/.env
+.npm-cache/
+Client/.npm-cache/
+server/.npm-cache/
+
